@@ -1,0 +1,19 @@
+{
+  "name": "fieldnote-mongo-analytics",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Combined IoT sensor and social media analytics dashboard powered by MongoDB aggregation pipelines.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "seed": "node scripts/seed.js",
+    "check": "node --check src/server.js && node --check src/routes/api.js && node --check scripts/seed.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongodb": "^6.12.0"
+  }
+}

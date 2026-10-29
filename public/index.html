@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3ee">
+  <meta name="description" content="A focused analytics workspace for IoT sensor telemetry and social activity, powered by MongoDB.">
+  <title>Fieldnote — MongoDB Analytics</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#overview" aria-label="Fieldnote home"><span class="brand-mark">F.</span><span>fieldnote<span class="brand-period">/</span></span></a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <button class="nav-link active" data-view="overview">Overview</button>
+        <button class="nav-link" data-view="sensors">Sensor data</button>
+        <button class="nav-link" data-view="social">Social activity</button>
+      </nav>
+      <div class="topbar-meta"><span class="live-indicator"></span><span id="connection-label">Connecting</span><span class="meta-divider"></span><span class="date-label" id="today-label">—</span></div>
+      <button class="menu-toggle" id="menu-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    </header>
+
+    <main>
+      <section class="page-heading">
+        <div><p class="eyebrow" id="page-kicker">ANALYTICS WORKSPACE / 01</p><h1 id="page-title">Signals, in context.</h1><p class="page-description" id="page-description">A clear view across physical environments and digital communities.</p></div>
+        <div class="heading-actions"><label class="range-control" for="range-select">Period <select id="range-select"><option value="7">Last 7 days</option><option value="14">Last 14 days</option><option value="30">Last 30 days</option></select></label><button class="button button-dark" id="refresh-button"><span class="refresh-icon">↻</span> Refresh data</button></div>
+      </section>
+
+      <div class="notice hidden" id="notice" role="status"></div>
+
+      <section class="view-panel" id="overview-view">
+        <div class="section-head"><div><p class="eyebrow">01 — AT A GLANCE</p><h2>Workspace overview</h2></div><span class="muted-note">Aggregated from MongoDB</span></div>
+        <div class="metric-grid">
+          <article class="metric-card metric-sage"><div class="metric-top"><span>Sensor readings</span><span class="metric-symbol">↗</span></div><div class="metric-value" id="metric-readings">—</div><div class="metric-foot"><span id="metric-devices">— devices</span><span class="metric-tag">TELEMETRY</span></div></article>
+          <article class="metric-card"><div class="metric-top"><span>Avg. temperature</span><span class="metric-symbol">°</span></div><div class="metric-value" id="metric-temperature">—<small>°C</small></div><div class="metric-foot"><span>Across reported readings</span><span class="metric-tag">ENVIRONMENT</span></div></article>
+          <article class="metric-card metric-blue"><div class="metric-top"><span>Total engagement</span><span class="metric-symbol">↗</span></div><div class="metric-value" id="metric-engagement">—</div><div class="metric-foot"><span id="metric-posts">— posts published</span><span class="metric-tag">SOCIAL</span></div></article>
+          <article class="metric-card"><div class="metric-top"><span>Community members</span><span class="metric-symbol">◎</span></div><div class="metric-value" id="metric-users">—</div><div class="metric-foot"><span id="metric-events">— activity events</span><span class="metric-tag">COMMUNITY</span></div></article>
+        </div>
+
+        <div class="content-grid overview-grid">
+          <article class="panel chart-panel"><div class="panel-heading"><div><p class="eyebrow">TELEMETRY</p><h3>Temperature over time</h3></div><span class="unit-label">°C / DAILY AVG.</span></div><div class="chart-wrap"><canvas id="temperature-chart" aria-label="Daily average temperature chart" role="img"></canvas><div class="chart-empty hidden" id="chart-empty">No sensor data for this period.</div></div><div class="chart-legend"><span><i class="legend-dot sage-dot"></i> Average temperature</span><span id="chart-period-label">Last 7 days</span></div></article>
+          <article class="panel platform-panel"><div class="panel-heading"><div><p class="eyebrow">DISTRIBUTION</p><h3>Engagement by platform</h3></div><span class="unit-label">INTERACTIONS</span></div><div class="platform-list" id="platform-list"><div class="loading-line">Loading platform data…</div></div><div class="panel-footnote">Likes + comments + shares</div></article>
+        </div>
+
+        <div class="content-grid lower-grid">
+          <article class="panel"><div class="panel-heading"><div><p class="eyebrow">DEVICE HEALTH</p><h3>Latest sensor alerts</h3></div><button class="text-button" data-go="sensors">All readings ↗</button></div><div class="table-scroll"><table><thead><tr><th>Device</th><th>Location</th><th>Temperature</th><th>Battery</th><th>Status</th></tr></thead><tbody id="alert-table"><tr><td colspan="5" class="empty-cell">Loading sensor alerts…</td></tr></tbody></table></div></article>
+          <article class="panel insight-panel"><div class="panel-heading"><div><p class="eyebrow">TOP CONTENT</p><h3>Most engaging posts</h3></div><button class="text-button" data-go="social">View all ↗</button></div><div id="top-posts" class="top-posts"><div class="loading-line">Loading post insights…</div></div></article>
+        </div>
+        <div class="method-note"><span class="method-index">i</span><p><strong>How this is calculated.</strong> Metrics are computed with MongoDB aggregation pipelines at request time. Sensor summaries group readings by day; engagement combines likes, comments and shares. Results update when the selected period changes.</p></div>
+      </section>
+
+      <section class="view-panel hidden" id="sensors-view">
+        <div class="section-head section-head-compact"><div><p class="eyebrow">02 — PHYSICAL SYSTEMS</p><h2>Sensor data</h2><p class="section-description">Telemetry history across connected devices and locations.</p></div><div class="inline-stat"><span class="inline-stat-value" id="sensor-total">—</span><span>readings found</span></div></div>
+        <div class="filter-bar"><label class="search-control"><span>⌕</span><input id="sensor-search" type="search" placeholder="Find device ID…" autocomplete="off"></label><label class="filter-control">Location<select id="location-filter"><option value="all">All locations</option></select></label><label class="filter-control">Condition<select id="sensor-status-filter"><option value="all">All readings</option><option value="alert">Needs attention</option></select></label></div>
+        <article class="panel data-panel"><div class="panel-heading"><div><p class="eyebrow">READING LOG</p><h3>Recent measurements</h3></div><span class="unit-label">NEWEST FIRST</span></div><div class="table-scroll"><table><thead><tr><th>Device ID</th><th>Location</th><th>Temperature</th><th>Humidity</th><th>Battery</th><th>Status</th><th>Recorded</th></tr></thead><tbody id="sensor-table"><tr><td colspan="7" class="empty-cell">Loading readings…</td></tr></tbody></table></div><div class="pagination"><span id="sensor-page-info">Page — of —</span><div class="pagination-actions"><button class="button button-light" id="sensor-prev">← Previous</button><button class="button button-light" id="sensor-next">Next →</button></div></div></article>
+        <div class="method-note"><span class="method-index">⌘</span><p><strong>Performance note.</strong> This view uses server-side pagination and indexed timestamp, device and location fields. Only the requested page is transferred to the browser.</p></div>
+      </section>
+
+      <section class="view-panel hidden" id="social-view">
+        <div class="section-head section-head-compact"><div><p class="eyebrow">03 — DIGITAL COMMUNITIES</p><h2>Social activity</h2><p class="section-description">Posts, engagement and activity patterns across platforms.</p></div><div class="inline-stat"><span class="inline-stat-value" id="post-total">—</span><span>posts indexed</span></div></div>
+        <div class="social-summary-grid"><article class="mini-stat"><span>Likes</span><strong id="social-likes">—</strong><small>Total in selected period</small></article><article class="mini-stat"><span>Comments</span><strong id="social-comments">—</strong><small>Total in selected period</small></article><article class="mini-stat"><span>Shares</span><strong id="social-shares">—</strong><small>Total in selected period</small></article><article class="mini-stat"><span>Activity events</span><strong id="social-activity">—</strong><small>Across the community</small></article></div>
+        <div class="filter-bar"><label class="search-control"><span>⌕</span><input id="post-search" type="search" placeholder="Search captions or usernames…" autocomplete="off"></label><label class="filter-control">Platform<select id="platform-filter"><option value="all">All platforms</option></select></label></div>
+        <article class="panel data-panel"><div class="panel-heading"><div><p class="eyebrow">CONTENT STREAM</p><h3>Recent posts</h3></div><span class="unit-label">NEWEST FIRST</span></div><div class="post-list" id="post-list"><div class="loading-line">Loading posts…</div></div><div class="pagination"><span id="post-page-info">Page — of —</span><div class="pagination-actions"><button class="button button-light" id="post-prev">← Previous</button><button class="button button-light" id="post-next">Next →</button></div></div></article>
+        <div class="method-note"><span class="method-index">∑</span><p><strong>Aggregation in action.</strong> Engagement rankings are calculated in MongoDB, while the post feed uses filtered, paginated queries. Activity summaries group events by date and event type.</p></div>
+      </section>
+    </main>
+    <footer class="footer"><div class="footer-brand"><span class="brand-mark small-mark">F.</span> fieldnote / analytics</div><div>Built with MongoDB aggregation pipelines</div><div id="footer-status">DEMO DATASET</div></footer>
+  </div>
+</body>
+</html>
